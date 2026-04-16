@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agreste — Enquête sur les habitudes des codeurs</title>
+  <meta name="description" content="Application de collecte et analyse de données pour le TP INF232 EC2 — Habitudes des codeurs">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-title">
+        <div class="header-logo">A</div>
+        <h1>Agreste</h1>
+      </div>
+      <div class="header-subtitle">TP INF232 EC2 — Habitudes des codeurs</div>
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-section="dashboard"><i class="fas fa-chart-line"></i> <span class="tab-label">Tableau de bord</span></button>
+        <button class="nav-tab" data-section="collecte"><i class="fas fa-pen-to-square"></i> <span class="tab-label">Collecte</span></button>
+        <button class="nav-tab" data-section="analyse"><i class="fas fa-chart-bar"></i> <span class="tab-label">Analyse</span></button>
+        <button class="nav-tab" data-section="regression"><i class="fas fa-chart-area"></i> <span class="tab-label">Régression</span></button>
+        <button class="nav-tab" data-section="export"><i class="fas fa-file-csv"></i> <span class="tab-label">Export CSV</span></button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="section active">
+      <h2 class="section-title">Tableau de bord</h2>
+      <p class="section-desc">Vue d'ensemble des données collectées sur les habitudes de programmation des étudiants.</p>
+      <div class="dashboard-content"><div class="loading"><i class="fas fa-spinner"></i> Chargement...</div></div>
+    </section>
+
+    <!-- COLLECTE -->
+    <section id="collecte" class="section">
+      <h2 class="section-title">Collecte de données</h2>
+      <p class="section-desc">Remplissez le formulaire ci-dessous pour enregistrer vos habitudes de programmation.</p>
+      <div class="form-card">
+        <form id="survey-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="age"><i class="fas fa-user"></i> Âge</label>
+              <input type="number" id="age" min="16" max="70" placeholder="Ex: 21" required>
+              <span class="error-msg"></span>
+            </div>
+            <div class="form-group">
+              <label for="annee_etude"><i class="fas fa-graduation-cap"></i> Année d'étude</label>
+              <select id="annee_etude" required>
+                <option value="">— Sélectionner —</option>
+                <option value="L1">L1</option>
+                <option value="L2">L2</option>
+                <option value="L3">L3</option>
+                <option value="M1">M1</option>
+                <option value="M2">M2</option>
+              </select>
+              <span class="error-msg"></span>
+            </div>
+            <div class="form-group">
+              <label for="heures_code"><i class="fas fa-clock"></i> Heures de code / semaine</label>
+              <input type="number" id="heures_code" min="0" max="100" step="0.5" placeholder="Ex: 15" required>
+              <span class="error-msg"></span>
+            </div>
+            <div class="form-group">
+              <label for="langage"><i class="fas fa-code"></i> Langage préféré</label>
+              <select id="langage" required>
+                <option value="">— Sélectionner —</option>
+                <option value="JavaScript">JavaScript</option>
+                <option value="Python">Python</option>
+                <option value="Java">Java</option>
+                <option value="C++">C++</option>
+                <option value="Autre">Autre</option>
+              </select>
+              <span class="error-msg"></span>
+            </div>
+            <div class="form-group full-width" id="ia-group">
+              <label><i class="fas fa-robot"></i> Utilisez-vous l'IA pour coder ?</label>
+              <input type="hidden" id="utilise_ia" value="">
+              <div class="toggle-group">
+                <button type="button" class="toggle-option" data-value="true"><i class="fas fa-check"></i> Oui</button>
+                <button type="button" class="toggle-option" data-value="false"><i class="fas fa-xmark"></i> Non</button>
+              </div>
+              <span class="error-msg"></span>
+            </div>
+            <div class="form-group">
+              <label for="autonomie"><i class="fas fa-brain"></i> Autonomie <span class="range-value" id="val-autonomie">5</span></label>
+              <input type="range" id="autonomie" min="1" max="10" value="5">
+            </div>
+            <div class="form-group">
+              <label for="satisfaction"><i class="fas fa-smile"></i> Satisfaction <span class="range-value" id="val-satisfaction">5</span></label>
+              <input type="range" id="satisfaction" min="1" max="10" value="5">
+            </div>
+            <div class="form-group">
+              <label for="projets"><i class="fas fa-folder-open"></i> Projets personnels réalisés</label>
+              <input type="number" id="projets" min="0" max="999" placeholder="Ex: 3" required>
+              <span class="error-msg"></span>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Envoyer</button>
+            <button type="button" class="btn btn-secondary" id="btn-reset"><i class="fas fa-rotate-right"></i> Réinitialiser</button>
+          </div>
+        </form>
+        <div class="success-msg" id="success-msg"><i class="fas fa-check-circle"></i> Réponse enregistrée avec succès ! Vous pouvez en ajouter une autre.</div>
+      </div>
+    </section>
+
+    <!-- ANALYSE -->
+    <section id="analyse" class="section">
+      <h2 class="section-title">Analyse descriptive</h2>
+      <p class="section-desc">Statistiques détaillées et visualisations graphiques des données collectées.</p>
+      <div class="analyse-content"><div class="loading"><i class="fas fa-spinner"></i> Chargement...</div></div>
+    </section>
+
+    <!-- REGRESSION -->
+    <section id="regression" class="section">
+      <h2 class="section-title">Régression linéaire</h2>
+      <p class="section-desc">Analyse de la relation entre l'utilisation de l'IA et le niveau d'autonomie.</p>
+      <div class="regression-content"><div class="loading"><i class="fas fa-spinner"></i> Chargement...</div></div>
+    </section>
+
+    <!-- EXPORT -->
+    <section id="export" class="section">
+      <h2 class="section-title">Export CSV</h2>
+      <p class="section-desc">Téléchargez l'ensemble des données collectées.</p>
+      <div class="export-content"><div class="loading"><i class="fas fa-spinner"></i> Chargement...</div></div>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
